@@ -14,6 +14,7 @@ def readFromPDF():
 	text = page.extract_text()
 	return text
 
+
 '''
 	- input: all text from the PDF
 	- return: a list with every line of the PDF (correctly separated by line)
@@ -32,12 +33,13 @@ def separateTextByLines(text):
 
 	return listWithLines
 
+
 '''
 	- input: separateTextByLines()
-	- output: a list of hashes (key-value) with the information that needs to be extracted (e.g. {001 SUELDO => 38,889.012}, {258 GASTOS MEDICOS => 453.00})
+	- output: a list with only the lines I need
 '''
 def getUsefulLines(lines):
-	# identify the line that contain "Concepto Importe" and "NETO A PAGAR"
+	# identify the line that contain "Concepto Importe" and "Recibí de la empresa arriba mencionada"
 	# all information we need is between those lines
 
 	usefulInformation = []
@@ -46,24 +48,40 @@ def getUsefulLines(lines):
 	for line in lines:
 		if "Concepto Importe" in line:
 			appendInformation = True
+			continue
 
-		if "NETO A PAGAR" in line:
+		if "Recibí de la empresa arriba mencionada" in line:
+			usefulInformation.append(line) # we need this line because at the beggining it have a number we need to split
 			break
 
 		if(appendInformation):
 			usefulInformation.append(line)
 
-	del usefulInformation[0] # delete line "Concepto Importe Concepto Importe"
 	return usefulInformation
 
-''' ---------------------------------------------------------- '''
+
+def separateByWords(usefulLines):
+	words = [] # [["001", "SUELDO", "38,889.01"], ...]
+	s = ''
+
+	for line in usefulLines:
+		for letter in line:
+			if(letter != " "):
+				if(letter == '\n'):
+					break
+				s += letter
+			else:
+				words.append(s)
+				s = ''
+
+	return words
 
 pdfInfo = readFromPDF()
 lines = separateTextByLines(pdfInfo)
 usefulLines = getUsefulLines(lines)
+getValues = separateByWords(usefulLines)
 
-
-for x in usefulLines:
+for x in getValues:
 	print(x)
 
 ''' 

@@ -1,8 +1,11 @@
+import sys
 from PyPDF2 import PdfReader # pip install PyPDF2
+
+FILENAME = sys.argv[1]
 
 def readFromPDF():
 	# read the information from the PDF
-	reader = PdfReader("test.pdf")
+	reader = PdfReader(FILENAME)
 	number_of_pages = len(reader.pages)
 
 	# should only have 1 page
@@ -156,7 +159,6 @@ def splitIfMoreThan2Decimals(word):
 def splitWordsAfter2Decimals(word):
 	dotAt = word.index(".") + 3
 	return word[:dotAt], word[dotAt:]
-
 
 pdfInfo = readFromPDF()
 lines = separateTextByLines(pdfInfo)

@@ -1,8 +1,11 @@
+import sys
 from PyPDF2 import PdfReader # pip install PyPDF2
+
+FILENAME = sys.argv[1]
 
 def readFromPDF():
 	# read the information from the PDF
-	reader = PdfReader("test.pdf")
+	reader = PdfReader(FILENAME)
 	number_of_pages = len(reader.pages)
 
 	# should only have 1 page
@@ -60,8 +63,12 @@ def getUsefulLines(lines):
 	return usefulInformation
 
 
-def separateByWords(usefulLines):
-	words = [] # [["001", "SUELDO", "38,889.01"], ...]
+'''
+	- input: getUsefulLines(lines) - the lines that we need to process
+	- output: split the lines/sentences by spaces
+'''
+def separateBySpaces(usefulLines):
+	words = []
 	s = ''
 
 	for line in usefulLines:
@@ -76,12 +83,90 @@ def separateByWords(usefulLines):
 
 	return words
 
+
+'''
+	- input: All the words/strings
+	- output: 
+		Split and categorize the words in (1) Concept Id, (2) Concept name, (3) Numbers and return a list
+		with all the information organized
+		E.g. of output [ [001, SUELDO, 100,889.01], [002, TEST, 1,889.99] ] 
+'''
+def mapTheInformationInStructure(words):
+	
+	infoStructured = []
+	tmpList = [] # [Concept Id, Concept, Number] e.g. [001, SUELDO, 100,889.01]
+
+	for word in words:
+
+		if(len(word) == 0): # if it is an empty line, ignore it
+			continue
+
+		# Concept Id
+		if(len(tmpList) == 0 and len(word) <= 4 and word[0].isnumeric()):
+			tmpList.append(word)
+			continue
+
+		# Concept name
+		if(not word[0].isnumeric()):
+			
+			if(len(tmpList) == 1):
+				tmpList.append(word)
+			else:
+				try:
+					tmpList[1] += " " + word
+				except IndexError:
+					pass
+			continue
+
+		if(word[0].isnumeric() and "." in word): # Number
+			
+			if(splitIfMoreThan2Decimals(word)):
+				word1,word2 = splitWordsAfter2Decimals(word)
+				tmpList.append(word1)
+				if(len(tmpList) != 1): # don't add to the final list if it's only one number
+					infoStructured.append(tmpList)
+				tmpList = []
+				tmpList.append(word2)
+				continue
+
+			tmpList.append(word)
+
+			if(len(tmpList) != 1): # don't add to the final list if it's only one number
+				infoStructured.append(tmpList)
+			tmpList = []
+			continue
+
+	return infoStructured
+
+
+def splitIfMoreThan2Decimals(word):
+	charsAfterDot = 0
+	afterDot = False
+
+	for char in word:
+		if(char == "."):
+			afterDot = True
+			continue
+
+		if(afterDot):
+			charsAfterDot+=1
+
+	if(charsAfterDot > 2):
+		return True
+	return False
+
+
+def splitWordsAfter2Decimals(word):
+	dotAt = word.index(".") + 3
+	return word[:dotAt], word[dotAt:]
+
 pdfInfo = readFromPDF()
 lines = separateTextByLines(pdfInfo)
 usefulLines = getUsefulLines(lines)
-getValues = separateByWords(usefulLines)
+words = separateBySpaces(usefulLines)
+informationStructured = mapTheInformationInStructure(words)
 
-for x in getValues:
+for x in informationStructured:
 	print(x)
 
 ''' 

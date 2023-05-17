@@ -101,24 +101,35 @@ def mapTheInformationInStructure(words):
 			tmpList.append(word)
 			continue
 
-		if(len(tmpList) == 1 and not word[0].isnumeric()): # Concept name
-			tmpList.append(word)
+		if(not word[0].isnumeric()): # Concept name
+			#print("Checking case: " + word)
+			
+			if(len(tmpList) == 1):
+				#print("{} Added as first word!!")
+				tmpList.append(word)
+			else:
+				try:
+					#print("{} Appended to: " + tmpList[1])
+					tmpList[1] += " " + word
+					#print("{} Result: " + tmpList[1])
+				except IndexError:
+					pass
+
 			#print("Concept name: " + word)
 			continue
 
 		if(word[0].isnumeric() and "." in word): # Number
 			
 			if(splitIfMoreThan2Decimals(word)):
-				print("To analize: " + word)
+				#print("To analize: " + word)
 				word1,word2 = splitWordsAfter2Decimals(word)
-				print("two different words: " + word1 + ", " + word2)
+				#print("two different words: " + word1 + ", " + word2)
 				tmpList.append(word1)
 				infoStructured.append(tmpList)
 				tmpList = []
 				tmpList.append(word2)
 				continue
 
-			#print("Number:" + word)
 			tmpList.append(word)
 			infoStructured.append(tmpList)
 			tmpList = []

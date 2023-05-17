@@ -60,8 +60,12 @@ def getUsefulLines(lines):
 	return usefulInformation
 
 
-def separateByWords(usefulLines):
-	words = [] # [["001", "SUELDO", "38,889.01"], ...]
+'''
+	- input: getUsefulLines(lines) - the lines that we need to process
+	- output: split the lines/sentences by spaces
+'''
+def separateBySpaces(usefulLines):
+	words = []
 	s = ''
 
 	for line in usefulLines:
@@ -76,14 +80,71 @@ def separateByWords(usefulLines):
 
 	return words
 
+
+'''
+	- input: getUsefulLines(lines) - the lines that we need to process
+	- output: split the lines/sentences by spaces
+'''
+def mapTheInformationInStructure(words):
+	
+	infoStructured = []
+	tmpList = [] # [Concept Id, Concept, Number] e.g. [001, SUELDO, 100,889.01]
+
+	for word in words:
+		#print("Working with: " + word)
+
+		if(len(word) == 0): # if it is an empty line, ignore it
+			continue
+
+		if(len(word) <= 4 and word[0].isnumeric()): # Concept Id
+			print("A: " + word)
+			tmpList.append(word)
+			continue
+
+		if(word[0].isnumeric() and "." in word): # Number
+			if(splitIfMoreThan2Decimals(word)):
+				print("To analize: " + word)
+				splitWordsAfter2Decimals(word)
+				continue
+			print("B:" + word)
+			tmpList.append(word)
+			continue
+
+		if(not word.isnumeric()): # Concept name
+			tmpList.append(word)
+			print("C: " + word)
+			continue
+
+	return
+
+
+def splitIfMoreThan2Decimals(word):
+	charsAfterDot = 0
+	afterDot = False
+
+	for char in word:
+		if(char == "."):
+			afterDot = True
+			continue
+
+		if(afterDot):
+			charsAfterDot+=1
+
+	if(charsAfterDot > 2):
+		return True
+	return False
+
+
+def splitWordsAfter2Decimals(word):
+	dotAt = word.index(".") + 3
+	return word[:dotAt], word[dotAt:]
+
+
 pdfInfo = readFromPDF()
 lines = separateTextByLines(pdfInfo)
 usefulLines = getUsefulLines(lines)
-getValues = separateByWords(usefulLines)
-
-for x in getValues:
-	print(x)
-
+words = separateBySpaces(usefulLines)
+informationStructured = mapTheInformationInStructure(words)
 ''' 
 References:
 https://www.geeksforgeeks.org/working-with-pdf-files-in-python/

@@ -82,8 +82,11 @@ def separateBySpaces(usefulLines):
 
 
 '''
-	- input: getUsefulLines(lines) - the lines that we need to process
-	- output: split the lines/sentences by spaces
+	- input: All the words/strings
+	- output: 
+		Split and categorize the words in (1) Concept Id, (2) Concept name, (3) Numbers and return a list
+		with all the information organized
+		E.g. of output [ [001, SUELDO, 100,889.01], [002, TEST, 1,889.99] ] 
 '''
 def mapTheInformationInStructure(words):
 	
@@ -91,47 +94,42 @@ def mapTheInformationInStructure(words):
 	tmpList = [] # [Concept Id, Concept, Number] e.g. [001, SUELDO, 100,889.01]
 
 	for word in words:
-		#print("Working with: " + word)
 
 		if(len(word) == 0): # if it is an empty line, ignore it
 			continue
 
-		if(len(tmpList) == 0 and len(word) <= 4 and word[0].isnumeric()): # Concept Id
-			#print("Concept Id: " + word)
+		# Concept Id
+		if(len(tmpList) == 0 and len(word) <= 4 and word[0].isnumeric()):
 			tmpList.append(word)
 			continue
 
-		if(not word[0].isnumeric()): # Concept name
-			#print("Checking case: " + word)
+		# Concept name
+		if(not word[0].isnumeric()):
 			
 			if(len(tmpList) == 1):
-				#print("{} Added as first word!!")
 				tmpList.append(word)
 			else:
 				try:
-					#print("{} Appended to: " + tmpList[1])
 					tmpList[1] += " " + word
-					#print("{} Result: " + tmpList[1])
 				except IndexError:
 					pass
-
-			#print("Concept name: " + word)
 			continue
 
 		if(word[0].isnumeric() and "." in word): # Number
 			
 			if(splitIfMoreThan2Decimals(word)):
-				#print("To analize: " + word)
 				word1,word2 = splitWordsAfter2Decimals(word)
-				#print("two different words: " + word1 + ", " + word2)
 				tmpList.append(word1)
-				infoStructured.append(tmpList)
+				if(len(tmpList) != 1): # don't add to the final list if it's only one number
+					infoStructured.append(tmpList)
 				tmpList = []
 				tmpList.append(word2)
 				continue
 
 			tmpList.append(word)
-			infoStructured.append(tmpList)
+
+			if(len(tmpList) != 1): # don't add to the final list if it's only one number
+				infoStructured.append(tmpList)
 			tmpList = []
 			continue
 

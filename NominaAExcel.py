@@ -96,26 +96,35 @@ def mapTheInformationInStructure(words):
 		if(len(word) == 0): # if it is an empty line, ignore it
 			continue
 
-		if(len(word) <= 4 and word[0].isnumeric()): # Concept Id
-			print("A: " + word)
+		if(len(tmpList) == 0 and len(word) <= 4 and word[0].isnumeric()): # Concept Id
+			#print("Concept Id: " + word)
 			tmpList.append(word)
+			continue
+
+		if(len(tmpList) == 1 and not word[0].isnumeric()): # Concept name
+			tmpList.append(word)
+			#print("Concept name: " + word)
 			continue
 
 		if(word[0].isnumeric() and "." in word): # Number
+			
 			if(splitIfMoreThan2Decimals(word)):
 				print("To analize: " + word)
-				splitWordsAfter2Decimals(word)
+				word1,word2 = splitWordsAfter2Decimals(word)
+				print("two different words: " + word1 + ", " + word2)
+				tmpList.append(word1)
+				infoStructured.append(tmpList)
+				tmpList = []
+				tmpList.append(word2)
 				continue
-			print("B:" + word)
+
+			#print("Number:" + word)
 			tmpList.append(word)
+			infoStructured.append(tmpList)
+			tmpList = []
 			continue
 
-		if(not word.isnumeric()): # Concept name
-			tmpList.append(word)
-			print("C: " + word)
-			continue
-
-	return
+	return infoStructured
 
 
 def splitIfMoreThan2Decimals(word):
@@ -145,6 +154,10 @@ lines = separateTextByLines(pdfInfo)
 usefulLines = getUsefulLines(lines)
 words = separateBySpaces(usefulLines)
 informationStructured = mapTheInformationInStructure(words)
+
+for x in informationStructured:
+	print(x)
+
 ''' 
 References:
 https://www.geeksforgeeks.org/working-with-pdf-files-in-python/
